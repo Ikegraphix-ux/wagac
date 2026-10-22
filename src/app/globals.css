@@ -1,0 +1,212 @@
+@import "tailwindcss";
+
+:root {
+  --green: #07583e;
+  --green-dark: #03452f;
+  --green-soft: #eaf5ee;
+  --red: #e6292e;
+  --ink: #17342a;
+  --muted: #64746c;
+  --cream: #fbfcf8;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--cream);
+  color: var(--ink);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+::selection {
+  background: #c9e8b0;
+  color: #073c2a;
+}
+
+.container {
+  width: min(1160px, calc(100% - 40px));
+  margin-inline: auto;
+}
+
+.eyebrow {
+  color: var(--red);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.section-title {
+  color: var(--green-dark);
+  font-size: clamp(1.9rem, 3.5vw, 2.8rem);
+  font-weight: 850;
+  letter-spacing: -0.04em;
+  line-height: 1.12;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  border-radius: 999px;
+  padding: 0.85rem 1.2rem;
+  font-size: 0.9rem;
+  font-weight: 750;
+  transition:
+    transform 0.2s,
+    background 0.2s;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+}
+
+.btn-primary {
+  background: var(--red);
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #c91e25;
+}
+
+.btn-outline {
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  color: white;
+}
+
+.btn-green {
+  background: var(--green);
+  color: white;
+}
+
+.focus-ring:focus-visible {
+  outline: 3px solid #f4bd36;
+  outline-offset: 3px;
+}
+
+.hero-slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 900ms ease-in-out;
+}
+
+.hero-slide.is-active {
+  opacity: 1;
+}
+
+.hero-slide img {
+  transform: scale(1.03);
+  transition: transform 8s ease-out;
+}
+
+.hero-slide.is-active img {
+  transform: scale(1.1);
+}
+
+.hero-gradient-motion {
+  pointer-events: none;
+  background-image:
+    linear-gradient(
+      to right,
+      rgba(2, 45, 32, 0.91) 0%,
+      rgba(3, 55, 39, 0.76) 48%,
+      rgba(3, 69, 47, 0.22) 100%
+    ),
+    radial-gradient(
+      circle at 75% 35%,
+      rgba(201, 237, 128, 0.24),
+      transparent 42%
+    );
+  background-position: center, 0% 50%;
+  background-size: 100% 100%, 200% 200%;
+  animation: hero-gradient-shift 22s ease-in-out infinite alternate;
+}
+
+section[class~="bg-[#064b35]"] {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+section[class~="bg-[#064b35]"]::before {
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(
+      circle at 15% 20%,
+      rgba(201, 237, 128, 0.12),
+      transparent 38%
+    ),
+    radial-gradient(circle at 85% 80%, rgba(230, 41, 46, 0.1), transparent 35%);
+  background-position: 0% 50%, 100% 50%;
+  background-size: 200% 200%;
+  animation: hero-color-shift 26s ease-in-out infinite alternate;
+  content: "";
+  inset: 0;
+}
+
+section[class~="bg-[#064b35]"] > .container {
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes hero-gradient-shift {
+  from {
+    background-position: center, 0% 50%;
+  }
+
+  to {
+    background-position: center, 100% 50%;
+  }
+}
+
+@keyframes hero-color-shift {
+  from {
+    background-position: 0% 50%, 100% 50%;
+  }
+
+  to {
+    background-position: 100% 50%, 0% 50%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-slide,
+  .hero-gradient-motion,
+  section[class~="bg-[#064b35]"]::before {
+    animation: none;
+  }
+
+  .hero-slide,
+  .hero-slide img {
+    transition: none;
+  }
+
+  .hero-slide img,
+  .hero-slide.is-active img {
+    transform: none;
+  }
+}
