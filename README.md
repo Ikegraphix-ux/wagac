@@ -1,10 +1,10 @@
 # WAG Angels Academy website starter
 
-A responsive Next.js + React + TypeScript + Tailwind CSS website for WAG Angels Academy. It includes the school crest, mobile navigation, homepage, About and Academics pages, both campus pages with Google Maps, admissions enquiry page, and a Firebase-authenticated admin entry/dashboard shell.
+A responsive Next.js + React + TypeScript + Tailwind CSS website for WAG Angels Academy. It includes the school crest, mobile navigation, homepage, About and Academics pages, both campus pages with Google Maps, admissions enquiries, and a Firebase-authenticated content dashboard.
 
 ## Requirements
 - Node.js 20.9+ recommended
-- A Firebase project for admin authentication and future content management
+- A Firebase project for admin authentication, Firestore, Storage, and Analytics
 
 ## Run locally
 
@@ -16,18 +16,18 @@ npm run dev
 
 Open http://localhost:3000. The public pages run without Firebase credentials. The admin route will show setup instructions until Firebase is configured.
 
-## Firebase setup before enabling admin
+## Firebase setup
 1. Create a Firebase project and register a web app.
 2. Enable **Authentication → Email/Password**.
-3. Copy the web app configuration into `.env.local` using `.env.example` as the key list.
-4. Deploy `firestore.rules` and `storage.rules` using the Firebase CLI or console.
+3. Copy the web app configuration into `.env.local` using `.env.example` as the key list. Set `NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID` to enable Analytics; other Firebase features work without it.
+4. Deploy `firestore.rules` and `storage.rules` using the Firebase CLI or console. Configure Firebase App Check before accepting public submissions.
 5. Create admin users deliberately and assign the `role: "admin"` custom claim from a trusted server using the Firebase Admin SDK. Never allow users to set their own claims from the browser. Force-refresh their ID token after claims are set.
-6. Configure App Check, backups, monitoring, and a privacy notice before launch.
+6. Configure backups, monitoring, and a privacy notice before launch. Do not place service-account credentials in this web app or commit `.env.local`.
 
-The included admin dashboard is a **starter shell**, not a complete CMS. Its sign-in flow checks a Firebase custom claim, but no content CRUD/upload screens or server-side admin provisioning are implemented yet. Database and Storage rules must be deployed; a client-side role check alone is not security.
+The admin dashboard checks a Firebase custom claim and provides JSON-based create, edit, and delete screens for `public_content`, `campuses`, `news`, `events`, and `gallery`. It supports image uploads to Firebase Storage and read-only review of admissions enquiries. Firestore and Storage rules enforce admin claims independently of the UI. News, events, and gallery items appear on the homepage only when their `published` field is `true`.
 
 ## Admissions form
-The current form prepares an email using the visitor's local email app. It does not store the submission or send it automatically. Before production, confirm the school's receiving email and connect a validated server-side endpoint or Firestore create flow with abuse protection, retention limits and a privacy notice.
+When Firebase is configured, admissions enquiries are stored in the `enquiries` Firestore collection and are visible to admins. Without Firebase configuration, the form retains its email-app fallback. Before production, deploy the Firestore rules, enable App Check, and confirm the school's process for responding to enquiries, data retention, and privacy notices.
 
 ## School images
 Approved school photos and the academy crest are stored in `public/images/`. Hero areas use a responsive image slideshow with manual controls and reduced-motion support.

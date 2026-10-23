@@ -2,8 +2,10 @@
 
 import { useState } from 'react';
 import { ArrowRight, CheckCircle2, Phone } from 'lucide-react';
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { HeroSlideshow } from '@/components/hero-slideshow';
 import { SectionHeading } from '@/components/section-heading';
+import { db } from '@/lib/firebase';
 
 export default function Admissions() {
   const [sent, setSent] = useState(false);
@@ -12,21 +14,52 @@ export default function Admissions() {
   const [phone, setPhone] = useState('');
   const [className, setClassName] = useState('');
   const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
 
-  function submit(event: React.FormEvent<HTMLFormElement>) {
+  async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    const body = `Admissions enquiry
+    setError('');
+    if (!db) {
+      const body = `Admissions enquiry
 Parent/Guardian: ${name}
 Phone: ${phone}
 Campus: ${campus}
 Class: ${className}
 Message: ${message}`;
 
-    window.location.href = `mailto:?subject=${encodeURIComponent(
-      'WAG Angels Academy admissions enquiry',
-    )}&body=${encodeURIComponent(body)}`;
-    setSent(true);
+      window.location.href = `mailto:?subject=${encodeURIComponent(
+        'WAG Angels Academy admissions enquiry',
+      )}&body=${encodeURIComponent(body)}`;
+      setSent(true);
+      return;
+    }
+
+    setBusy(true);
+    try {
+      await addDoc(collection(db, 'enquiries'), {
+        name: name.trim(),
+        phone: phone.trim(),
+        campus,
+        className: className.trim(),
+        message: message.trim(),
+        createdAt: serverTimestamp(),
+      });
+      setSent(true);
+      setName('');
+      setPhone('');
+      setCampus('');
+      setClassName('');
+      setMessage('');
+    } catch (submitError) {
+      console.error('Could not save the admissions enquiry.', submitError);
+      setError(
+        'We could not submit your enquiry right now. Please try again or call the school directly.',
+      );
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
@@ -96,14 +129,21 @@ Message: ${message}`;
           >
             <h2 className="text-2xl font-extrabold">Admissions enquiry</h2>
             <p className="mt-2 text-sm text-slate-500">
-              Complete the fields below. Your email app will open with the
-              enquiry drafted; nothing is stored by this demo form.
+              {db
+                ? 'Complete the fields below and your enquiry will be stored for the school to review.'
+                : 'Complete the fields below. Your email app will open with the enquiry drafted; nothing is stored by this form.'}
             </p>
             {sent && (
-              <p className="mt-4 flex items-center gap-2 rounded-xl bg-green-50 p-3 text-sm text-green-800">
+              <p role="status" className="mt-4 flex items-center gap-2 rounded-xl bg-green-50 p-3 text-sm text-green-800">
                 <CheckCircle2 size={18} />
-                Your email app should open with the enquiry details. Please
-                send the message to the school.
+                {db
+                  ? 'Your enquiry has been submitted. The school will contact you soon.'
+                  : 'Your email app should open with the enquiry details. Please send the message to the school.'}
+              </p>
+            )}
+            {error && (
+              <p role="alert" className="mt-4 rounded-xl bg-red-50 p-3 text-sm text-red-700">
+                {error}
               </p>
             )}
 
@@ -112,6 +152,7 @@ Message: ${message}`;
                 Parent / guardian name
                 <input
                   required
+                  maxLength={100}
                   value={name}
                   onChange={(event) => setName(event.target.value)}
                   className="mt-2 block w-full rounded-xl border border-slate-200 px-4 py-3 font-normal outline-none focus:border-[#07583e]"
@@ -122,6 +163,7 @@ Message: ${message}`;
                 Phone number
                 <input
                   required
+                  maxLength={30}
                   value={phone}
                   onChange={(event) => setPhone(event.target.value)}
                   className="mt-2 block w-full rounded-xl border border-slate-200 px-4 py-3 font-normal outline-none focus:border-[#07583e]"
@@ -145,6 +187,7 @@ Message: ${message}`;
                 Class of interest
                 <input
                   required
+                  maxLength={100}
                   value={className}
                   onChange={(event) => setClassName(event.target.value)}
                   className="mt-2 block w-full rounded-xl border border-slate-200 px-4 py-3 font-normal outline-none focus:border-[#07583e]"
@@ -156,6 +199,7 @@ Message: ${message}`;
             <label className="mt-5 block text-sm font-bold">
               Message (optional)
               <textarea
+                maxLength={2000}
                 value={message}
                 onChange={(event) => setMessage(event.target.value)}
                 rows={4}
@@ -163,8 +207,13 @@ Message: ${message}`;
                 placeholder="How can we help?"
               />
             </label>
-            <button className="btn btn-primary mt-6" type="submit">
-              Prepare enquiry <ArrowRight size={16} />
+            <button
+              className="btn btn-primary mt-6 disabled:opacity-60"
+              type="submit"
+              disabled={busy}
+            >
+              {busy ? 'Submitting…' : db ? 'Submit enquiry' : 'Prepare enquiry'}
+              {!busy && <ArrowRight size={16} />}
             </button>
           </form>
         </div>
