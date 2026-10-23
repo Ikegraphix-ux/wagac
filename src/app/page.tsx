@@ -13,6 +13,7 @@ import {
 import { SchoolImage } from '@/components/school-image';
 import { HeroSlideshow } from '@/components/hero-slideshow';
 import { SectionHeading } from '@/components/section-heading';
+import { FirebaseUpdates } from '@/components/firebase-updates';
 
 const values = [
   {
@@ -198,6 +199,8 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <FirebaseUpdates />
 
       <section className="py-16 sm:py-20">
         <div className="container grid gap-10 lg:grid-cols-[.85fr_1.15fr] lg:items-center">
