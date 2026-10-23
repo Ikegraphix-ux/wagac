@@ -18,6 +18,11 @@ html {
   scroll-behavior: smooth;
 }
 
+html,
+body {
+  scroll-padding-top: 1rem;
+}
+
 body {
   margin: 0;
   background: var(--cream);
@@ -61,6 +66,19 @@ select {
   font-weight: 850;
   letter-spacing: -0.04em;
   line-height: 1.12;
+}
+
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 700ms ease,
+    transform 700ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.scroll-reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .btn {
@@ -194,6 +212,16 @@ section[class~="bg-[#064b35]"] > .container {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .scroll-reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
   .hero-slide,
   .hero-gradient-motion,
   section[class~="bg-[#064b35]"]::before {
