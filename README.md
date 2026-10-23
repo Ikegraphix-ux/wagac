@@ -21,13 +21,13 @@ Open http://localhost:3000. The public pages run without Firebase credentials. T
 2. Enable **Authentication → Email/Password**.
 3. Copy the web app configuration into `.env.local` using `.env.example` as the key list. Set `NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID` to enable Analytics; other Firebase features work without it.
 4. Deploy `firestore.rules` and `storage.rules` using the Firebase CLI or console. Configure Firebase App Check before accepting public submissions.
-5. Create admin users deliberately and assign the `role: "admin"` custom claim from a trusted server using the Firebase Admin SDK. Never allow users to set their own claims from the browser. Force-refresh their ID token after claims are set.
+5. Create Firebase accounts only for people trusted with the dashboard and admissions data.
 6. Configure backups, monitoring, and a privacy notice before launch. Do not place service-account credentials in this web app or commit `.env.local`.
 
-The admin dashboard checks a Firebase custom claim and provides JSON-based create, edit, and delete screens for `public_content`, `campuses`, `news`, `events`, and `gallery`. It supports image uploads to Firebase Storage and read-only review of admissions enquiries. Firestore and Storage rules enforce admin claims independently of the UI. News, events, and gallery items appear on the homepage only when their `published` field is `true`.
+The admin dashboard is available to **any signed-in Firebase user**, with no custom admin claim required. It provides JSON-based create, edit, and delete screens for `public_content`, `campuses`, `news`, `events`, and `gallery`, supports image uploads to Firebase Storage, and allows read-only review of admissions enquiries. Firestore and Storage rules allow any authenticated account to manage content and read enquiries. **This is broad access:** anyone able to create or obtain a Firebase account may be able to access family enquiry details, edit website content, or upload images. Do not use this configuration if Firebase account creation is open to the public. News, events, and gallery items appear on the homepage only when their `published` field is `true`.
 
 ## Admissions form
-When Firebase is configured, admissions enquiries are stored in the `enquiries` Firestore collection and are visible to admins. Without Firebase configuration, the form retains its email-app fallback. Before production, deploy the Firestore rules, enable App Check, and confirm the school's process for responding to enquiries, data retention, and privacy notices.
+When Firebase is configured, admissions enquiries are stored in the `enquiries` Firestore collection and are visible to every signed-in Firebase user. Without Firebase configuration, the form retains its email-app fallback. Before production, deploy the Firestore rules, enable App Check, and confirm the school's process for responding to enquiries, data retention, and privacy notices.
 
 ## School images
 Approved school photos and the academy crest are stored in `public/images/`. Hero areas use a responsive image slideshow with manual controls and reduced-motion support.

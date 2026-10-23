@@ -21,8 +21,7 @@ import { auth, db, firebaseConfigured, storage } from '@/lib/firebase';
 
 export default function Admin() {
   const [user, setUser] = useState<User | null>(null);
-  const [roleChecked, setRoleChecked] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -30,31 +29,13 @@ export default function Admin() {
 
   useEffect(() => {
     if (!auth) {
-      setRoleChecked(true);
+      setAuthChecked(true);
       return;
     }
 
     return onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
-      setRoleChecked(false);
-      if (!currentUser) {
-        setIsAdmin(false);
-        setRoleChecked(true);
-        return;
-      }
-
-      void currentUser
-        .getIdTokenResult(true)
-        .then((token) => {
-          setIsAdmin(
-            token.claims.role === 'admin' || token.claims.admin === true,
-          );
-        })
-        .catch((tokenError: unknown) => {
-          console.error('Could not verify the admin claim.', tokenError);
-          setIsAdmin(false);
-        })
-        .finally(() => setRoleChecked(true));
+      setAuthChecked(true);
     });
   }, []);
 
@@ -83,8 +64,8 @@ export default function Admin() {
           <h1 className="text-2xl font-extrabold">Admin setup required</h1>
           <p className="mt-3 text-sm leading-6 text-slate-700">
             Firebase credentials are not configured yet. Add the web app values to
-            <code> .env.local</code>, enable Email/Password Authentication, set an
-            admin custom claim securely, and deploy this project&apos;s Firestore
+            <code> .env.local</code>, enable Email/Password Authentication, and
+            deploy this project&apos;s Firestore
             and Storage rules before using the dashboard.
           </p>
         </div>
@@ -92,7 +73,7 @@ export default function Admin() {
     );
   }
 
-  if (!roleChecked) {
+  if (!authChecked) {
     return (
       <main className="grid min-h-[60vh] place-items-center">
         Checking secure session…
@@ -100,7 +81,7 @@ export default function Admin() {
     );
   }
 
-  if (!user || !isAdmin) {
+  if (!user) {
     return (
       <main className="min-h-[65vh] px-5 py-14">
         <form
@@ -112,7 +93,7 @@ export default function Admin() {
           </div>
           <h1 className="text-3xl font-black">Staff admin</h1>
           <p className="mt-2 text-sm leading-6 text-slate-600">
-            Sign in with an authorised school administrator account.
+            Sign in with a Firebase account to access the staff dashboard.
           </p>
           {error && (
             <p role="alert" className="mt-4 rounded-xl bg-red-50 p-3 text-sm text-red-700">
@@ -147,15 +128,10 @@ export default function Admin() {
           >
             {busy ? 'Signing in…' : 'Sign in securely'}
           </button>
-          {user && !isAdmin && (
-            <p className="mt-4 text-sm text-red-700">
-              This account does not have the required administrator role. Contact the
-              system administrator.
-            </p>
-          )}
           <p className="mt-5 text-xs leading-5 text-slate-500">
-            Access is restricted by Firebase Authentication and admin claims. Do not
-            create public administrator accounts.
+            Any signed-in Firebase account can access the dashboard and its data.
+            Only give accounts to people trusted with admissions enquiries and
+            website content.
           </p>
         </form>
       </main>
@@ -219,10 +195,10 @@ export default function Admin() {
 
         <AdminContentManager db={db} storage={storage} />
 
-        <p className="mt-5 text-xs leading-5 text-slate-500">
-          Firestore and Storage rules enforce administrator claims independently of
-          this page. Handle admissions contact details according to the school&apos;s
-          privacy and retention policies.
+        <p className="mt-5 text-xs leading-5 text-amber-800">
+          All signed-in Firebase users can read admissions enquiries, edit content,
+          and upload images. Handle admissions contact details according to the
+          school&apos;s privacy and retention policies.
         </p>
       </div>
     </main>
